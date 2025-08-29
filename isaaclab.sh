@@ -16,7 +16,15 @@ set -e
 tabs 4
 
 # get source directory
-export ISAACLAB_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+# Determine the script directory
+if [ -n "$ZSH_VERSION" ]; then
+    export ISAACLAB_PATH="$( cd "$( dirname "$0" )" &> /dev/null && pwd )"
+else
+    export ISAACLAB_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+fi
+
+echo "ISAACLAB_PATH is set to: ${ISAACLAB_PATH}"
+
 
 #==
 # Helper functions
@@ -342,8 +350,12 @@ while [[ $# -gt 0 ]]; do
     # read the key
     case "$1" in
         -i|--install)
+            echo "$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+            echo "[INFO] ISAACLAB_PATH is: ${ISAACLAB_PATH}"
+            
             # install system dependencies first
             install_system_deps
+
             # install the python packages in IsaacLab/source directory
             echo "[INFO] Installing extensions inside the Isaac Lab repository..."
             python_exe=$(extract_python_exe)
@@ -368,6 +380,7 @@ while [[ $# -gt 0 ]]; do
             # this does not check dependencies between extensions
             export -f extract_python_exe
             export -f install_isaaclab_extension
+            echo "[INFO] ISAACLAB_PATH is: ${ISAACLAB_PATH}"
             # source directory
             find -L "${ISAACLAB_PATH}/source" -mindepth 1 -maxdepth 1 -type d -exec bash -c 'install_isaaclab_extension "{}"' \;
             # install the python packages for supported reinforcement learning frameworks
